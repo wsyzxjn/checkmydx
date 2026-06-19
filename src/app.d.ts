@@ -2,22 +2,22 @@
 // for information about these interfaces
 
 declare global {
-	namespace App {
-		// interface Error {}
-		// interface Locals {}
-		// interface PageData {}
-		// interface PageState {}
-		interface Platform {
-			env: {
-				GITHUB_TOKEN?: string;
-				PROFILE_VIEWS: KVNamespace;
-			};
-			context: {
-				waitUntil(promise: Promise<any>): void;
-			};
-			caches: CacheStorage & { default: Cache };
-		}
-	}
+  namespace App {
+    // interface Error {}
+    // interface Locals {}
+    // interface PageData {}
+    // interface PageState {}
+    interface Platform {
+      env: {
+        GITHUB_TOKEN?: string;
+        PROFILE_VIEWS: KVNamespace;
+      };
+      context: {
+        waitUntil(promise: Promise<any>): void;
+      };
+      caches: CacheStorage & { default: Cache };
+    }
+  }
 }
 
 export {};

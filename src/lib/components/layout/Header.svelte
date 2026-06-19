@@ -1,51 +1,53 @@
 <script lang="ts">
-	import Logo from './header/Logo.svelte';
-	import HeaderSearch from './header/HeaderSearch.svelte';
-	import HeaderControls from './header/HeaderControls.svelte';
-	import HeaderActions from './header/HeaderActions.svelte';
-	import type { TemplateType } from '$lib/types/portfolio';
+  import Logo from "./header/Logo.svelte";
+  import HeaderSearch from "./header/HeaderSearch.svelte";
+  import HeaderControls from "./header/HeaderControls.svelte";
+  import HeaderActions from "./header/HeaderActions.svelte";
+  import type { TemplateType } from "$lib/types/portfolio";
 
-	interface Props {
-		username?: string;
-		template?: TemplateType;
-		showControls?: boolean;
-		onTemplateChange?: (template: TemplateType) => void;
-		onExport?: () => void;
-		onShare?: () => void;
-		onQRCode?: () => void;
-	}
+  interface Props {
+    username?: string;
+    template?: TemplateType;
+    showControls?: boolean;
+    onTemplateChange?: (template: TemplateType) => void;
+    onExport?: () => void;
+    onShare?: () => void;
+    onQRCode?: () => void;
+  }
 
-	let {
-		username = '',
-		template = 'github',
-		showControls = false,
-		onTemplateChange,
-		onExport,
-		onShare,
-		onQRCode
-	}: Props = $props();
+  let {
+    username = "",
+    template = "github",
+    showControls = false,
+    onTemplateChange,
+    onExport,
+    onShare,
+    onQRCode,
+  }: Props = $props();
 </script>
 
 <header class="sticky top-0 z-50 w-full border-b border-border-default bg-bg-primary">
-	<div class="group mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-		<Logo />
+  <div
+    class="group mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8"
+  >
+    <Logo />
 
-		<!-- Center section with search or controls -->
-		<div class="flex flex-1 items-center justify-center gap-4">
-			{#if showControls}
-				<!-- Template selector hidden on mobile - GitHub style is default -->
-				<div class="hidden sm:block">
-					<HeaderControls {template} {onTemplateChange} />
-				</div>
-			{:else}
-				<HeaderSearch {username} />
-			{/if}
-		</div>
+    <!-- Center section with search or controls -->
+    <div class="flex flex-1 items-center justify-center gap-4">
+      {#if showControls}
+        <!-- Template selector hidden on mobile - GitHub style is default -->
+        <div class="hidden sm:block">
+          <HeaderControls {template} {onTemplateChange} />
+        </div>
+      {:else}
+        <HeaderSearch {username} />
+      {/if}
+    </div>
 
-		<div
-			class="flex items-center overflow-hidden transition-[max-width,opacity] duration-300 ease-out max-sm:max-w-[500px] max-sm:opacity-100 max-sm:group-has-[input:focus]:pointer-events-none max-sm:group-has-[input:focus]:max-w-0 max-sm:group-has-[input:focus]:opacity-0"
-		>
-			<HeaderActions {showControls} {onExport} {onShare} {onQRCode} />
-		</div>
-	</div>
+    <div
+      class="flex items-center overflow-hidden transition-[max-width,opacity] duration-300 ease-out max-sm:max-w-[500px] max-sm:opacity-100 max-sm:group-has-[input:focus]:pointer-events-none max-sm:group-has-[input:focus]:max-w-0 max-sm:group-has-[input:focus]:opacity-0"
+    >
+      <HeaderActions {showControls} {onExport} {onShare} {onQRCode} />
+    </div>
+  </div>
 </header>
