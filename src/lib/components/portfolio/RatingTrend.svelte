@@ -241,7 +241,7 @@
             />
           </svg>
           <p>历史记录不足，无法生成趋势图</p>
-          <p class="mt-1 text-[10px]">授权 LXNS 并多次同步后可显示 Rating 趋势</p>
+          <p class="mt-1 text-[10px]">授权 落雪咖啡屋 并多次同步后可显示 Rating 趋势</p>
         </div>
       </div>
     {/if}

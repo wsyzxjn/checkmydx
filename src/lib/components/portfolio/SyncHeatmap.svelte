@@ -96,7 +96,7 @@
             />
           </svg>
           <p>暂无同步热力图</p>
-          <p class="mt-1 text-[10px]">授权 LXNS 历史数据后可显示完整活动</p>
+          <p class="mt-1 text-[10px]">授权 落雪咖啡屋 历史数据后可显示完整活动</p>
         </div>
       </div>
     {/if}

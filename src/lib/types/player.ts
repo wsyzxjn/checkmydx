@@ -1,7 +1,7 @@
 // maimai DX player profile domain types
 //
 // This is the internal model produced by the mock adapter (server/maimai.ts)
-// and the LXNS OAuth adapter (client/lxns.ts), and consumed by the templates.
+// and the 落雪咖啡屋 OAuth adapter (client/lxns.ts), and consumed by the templates.
 // It reflects what the data source actually returns — no GitHub-shaped
 // vestiges, no fields we can't populate.
 

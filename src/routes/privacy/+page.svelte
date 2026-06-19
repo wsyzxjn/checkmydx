@@ -8,7 +8,7 @@
   <title>隐私说明 - CheckMyDX</title>
   <meta
     name="description"
-    content="CheckMyDX 的隐私说明：我们如何处理 LXNS OAuth 授权、浏览器本地 token 和访问统计。"
+    content="CheckMyDX 的隐私说明：我们如何处理 落雪咖啡屋 OAuth 授权、浏览器本地 token 和访问统计。"
   />
 </svelte:head>
 
@@ -24,7 +24,7 @@
     <section class="space-y-4">
       <h2 class="text-xl font-semibold text-text-primary">我们读取什么数据</h2>
       <p class="leading-relaxed text-text-secondary">
-        当你连接 LXNS 时，CheckMyDX 会在浏览器里通过 OAuth 读取你授权范围内的 maimai DX
+        当你连接 落雪咖啡屋 时，CheckMyDX 会在浏览器里通过 OAuth 读取你授权范围内的 maimai DX
         玩家信息、Best 50 和成绩同步热力图。
       </p>
     </section>
@@ -43,7 +43,7 @@
     <section class="space-y-4">
       <h2 class="text-xl font-semibold text-text-primary">第三方服务</h2>
       <ul class="ml-4 list-inside list-disc space-y-2 text-text-secondary">
-        <li><span class="text-text-primary">LXNS</span>：用于 OAuth 授权和读取成绩数据。</li>
+        <li><span class="text-text-primary">落雪咖啡屋</span>：用于 OAuth 授权和读取成绩数据。</li>
         <li><span class="text-text-primary">Cloudflare</span>：用于部署、CDN 和访问计数存储。</li>
         <li><span class="text-text-primary">GitHub</span>：用于托管项目源码。</li>
       </ul>

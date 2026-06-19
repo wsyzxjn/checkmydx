@@ -1,6 +1,6 @@
 <script lang="ts">
   import favicon from "$lib/assets/favicon.svg";
-  import { REPO_URL, AUTHOR_GITHUB_URL } from "$lib/constants";
+  import { AUTHOR_GITHUB_URL } from "$lib/constants";
 
   const currentYear = new Date().getFullYear();
 </script>
@@ -15,18 +15,6 @@
           CheckMyDX &copy; {currentYear}
         </span>
       </div>
-
-      <!-- Links -->
-      <nav class="flex items-center gap-6">
-        <a
-          href={REPO_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-sm text-text-secondary transition-colors hover:text-text-primary"
-        >
-          源码
-        </a>
-      </nav>
 
       <!-- Social -->
       <div class="flex items-center gap-4">

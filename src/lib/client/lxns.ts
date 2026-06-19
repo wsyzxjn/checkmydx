@@ -137,9 +137,9 @@ export async function finishLxnsOAuthCallback(url: URL) {
   const storedState = sessionStorage.getItem(OAUTH_STATE_KEY);
   const verifier = sessionStorage.getItem(OAUTH_VERIFIER_KEY);
 
-  if (!code) throw new Error("LXNS 没有返回授权码");
-  if (!state || state !== storedState) throw new Error("LXNS OAuth 状态校验失败");
-  if (!verifier) throw new Error("缺少 LXNS OAuth 校验信息");
+  if (!code) throw new Error("落雪咖啡屋 没有返回授权码");
+  if (!state || state !== storedState) throw new Error("落雪咖啡屋 OAuth 状态校验失败");
+  if (!verifier) throw new Error("缺少 落雪咖啡屋 OAuth 校验信息");
 
   const token = await createOAuthClient().exchangeCodeForToken({
     code,
@@ -177,7 +177,7 @@ function readStoredToken(): LxnsToken | null {
 
 async function getAccessToken() {
   const token = readStoredToken();
-  if (!token) throw new Error("请先连接 LXNS");
+  if (!token) throw new Error("请先连接 落雪咖啡屋");
 
   if (Date.now() < token.expiresAt - 30_000) {
     return token.accessToken;
@@ -286,7 +286,7 @@ function getConstantMap(): Promise<ConstantMap> {
   return constantMapPromise;
 }
 
-// Map a LXNS rate code (e.g. 'sssp') to a display label ('SSS+') and a color.
+// Map a 落雪咖啡屋 rate code (e.g. 'sssp') to a display label ('SSS+') and a color.
 const GRADE_META: Record<string, { label: string; color: string }> = {
   sssp: { label: "SSS+", color: "#fbbf24" },
   sss: { label: "SSS", color: "#fcd34d" },
@@ -294,7 +294,7 @@ const GRADE_META: Record<string, { label: string; color: string }> = {
   ss: { label: "SS", color: "#84cc16" },
   sp: { label: "S+", color: "#22d3ee" },
   s: { label: "S", color: "#38bdf8" },
-  // AAAp/AAAp/AAp/Ap/Bp map to A+/A/B+/B etc. — LXNS returns lowercase codes,
+  // AAAp/AAAp/AAp/Ap/Bp map to A+/A/B+/B etc. — 落雪咖啡屋 returns lowercase codes,
   // so keep a few lower-grade mappings for completeness even though the
   // distribution only renders S and above.
   aaap: { label: "AAA+", color: "#fb7185" },
@@ -311,7 +311,7 @@ const GRADE_META: Record<string, { label: string; color: string }> = {
   d: { label: "D", color: "#6366f1" },
 };
 
-// Normalize a raw LXNS rate code (any case) to the display label used across the UI.
+// Normalize a raw 落雪咖啡屋 rate code (any case) to the display label used across the UI.
 function normalizeGrade(rate?: string): string {
   if (!rate) return "—";
   return GRADE_META[rate.toLowerCase()]?.label ?? rate.toUpperCase();

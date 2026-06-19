@@ -68,7 +68,7 @@
     </h1>
 
     <p class="mx-auto mb-10 w-full max-w-150 text-base text-text-secondary md:text-xl">
-      从 LXNS 成绩数据生成可分享的玩家页，展示 Rating、同步热力图和代表成绩。
+      从 落雪咖啡屋 成绩数据生成可分享的玩家页，展示 Rating、同步热力图和代表成绩。
     </p>
 
     <!-- Input Container -->
@@ -121,7 +121,7 @@
           onclick={handleConnectLxns}
           class="h-10 rounded-xl px-6 font-semibold"
         >
-          连接 LXNS
+          连接 落雪咖啡屋
         </Button>
       </div>
     {/if}

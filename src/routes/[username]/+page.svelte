@@ -66,8 +66,8 @@
         profile = authorizedProfile;
       }
     } catch (err) {
-      console.warn("Failed to load LXNS OAuth profile:", err);
-      toastState.warning("暂时无法刷新 LXNS 数据，已显示预览数据。");
+      console.warn("Failed to load 落雪咖啡屋 OAuth profile:", err);
+      toastState.warning("暂时无法刷新 落雪咖啡屋 数据，已显示预览数据。");
     } finally {
       isRefreshingFromLxns = false;
     }
@@ -324,7 +324,7 @@
         <div
           class="border-b border-border-subtle bg-bg-secondary px-4 py-2 text-center text-xs text-text-tertiary"
         >
-          正在从 LXNS 刷新数据...
+          正在从 落雪咖啡屋 刷新数据...
         </div>
       {/if}
       {#if generatorState.template === "github"}

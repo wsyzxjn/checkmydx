@@ -6,12 +6,12 @@
   "compatibility_flags": ["nodejs_als"],
   "assets": {
     "binding": "ASSETS",
-    "directory": ".svelte-kit/cloudflare"
+    "directory": ".svelte-kit/cloudflare",
   },
   "kv_namespaces": [
     {
       "binding": "PROFILE_VIEWS",
-      "id": "99cb8627be16447aae60dbacc0299dc8"
-    }
-  ]
+      "id": "99cb8627be16447aae60dbacc0299dc8",
+    },
+  ],
 }

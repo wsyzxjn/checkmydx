@@ -1,7 +1,6 @@
 <script lang="ts">
   import Header from "$lib/components/layout/Header.svelte";
   import Footer from "$lib/components/layout/Footer.svelte";
-  import { REPO_URL } from "$lib/constants";
 </script>
 
 <svelte:head>
@@ -34,7 +33,7 @@
     <section class="space-y-4">
       <h2 class="text-xl font-semibold text-text-primary">数据从哪里来</h2>
       <p class="leading-relaxed text-text-secondary">
-        当前版本支持示例数据，也可以通过 LXNS OAuth
+        当前版本支持示例数据，也可以通过 落雪咖啡屋 OAuth
         在浏览器中读取你授权后的个人成绩数据。纯前端版本不会保存你的 client
         secret，也不会把授权数据交给 CheckMyDX 的服务端处理。
       </p>
@@ -46,14 +45,6 @@
         这个项目基于 CheckMyGit 改造，保留了原项目的模板、导出和分享体验，并把展示对象换成 maimai DX
         玩家成绩。
       </p>
-      <a
-        href={REPO_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-flex items-center gap-2 text-accent-blue transition-colors hover:underline"
-      >
-        查看源码
-      </a>
     </section>
   </article>
 </main>

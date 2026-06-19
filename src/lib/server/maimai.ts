@@ -18,7 +18,7 @@ import { normalizeUsername } from "$lib/utils/username";
 
 // Deterministic mock data so demo profiles (amatsuka / rainbow14 / dxstar)
 // stay stable across reloads without hitting any real API. Song ids are the
-// real LXNS ids so jacket covers resolve against assets2.lxns.net.
+// real 落雪咖啡屋 ids so jacket covers resolve against assets2.lxns.net.
 const SONG_POOL: Array<
   [id: number, title: string, level: string, constant: number, type: ChartType]
 > = [
