@@ -10,8 +10,8 @@
   },
   "kv_namespaces": [
     {
-      "binding": "PROFILE_VIEWS",
-      "id": "99cb8627be16447aae60dbacc0299dc8",
+      "binding": "checkmydx_views",
+      "id": "f8128af26ec74dafa1ae3530212d93ca",
     },
   ],
 }
