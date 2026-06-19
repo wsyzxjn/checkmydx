@@ -33,7 +33,6 @@
       />
     </svg>
     <h3 class="text-lg font-semibold text-text-primary">成绩质量</h3>
-    <span class="ml-1 text-xs text-text-tertiary">共 {profile.totalScoreCount} 条</span>
   </div>
 
   <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">

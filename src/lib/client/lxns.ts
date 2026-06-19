@@ -1,4 +1,4 @@
-import { LxnsOAuthClient } from "lxns-rhythm-api";
+import { LxnsOAuthClient, LxnsApiClient } from "lxns-rhythm-api";
 import { env } from "$env/dynamic/public";
 import { normalizeUsername } from "$lib/utils/username";
 import type {
@@ -13,6 +13,8 @@ import type {
   SyncWeek,
   ChartType,
   RatingTrendPoint,
+  B50Stats,
+  ConstantBucket,
 } from "$lib/types/player";
 
 const BASE_URL = "https://maimai.lxns.net/api/v0/";
@@ -45,6 +47,7 @@ type LxnsScore = {
   id: number;
   song_name?: string;
   level?: string;
+  level_index: number;
   achievements: number;
   dx_score: number;
   dx_rating?: number;
@@ -208,16 +211,22 @@ export async function fetchAuthorizedMaimaiProfile(): Promise<PlayerProfile> {
   return transformLxnsProfile(player, bests, allScoresRaw, heatmap, trend);
 }
 
-function scoreToPlayerScore(score: LxnsScore): PlayerScore {
+async function scoreToPlayerScore(
+  score: LxnsScore,
+  constantMap: ConstantMap,
+): Promise<PlayerScore> {
   const level = score.level || "??";
-  const constant = parseConstant(level);
+  // Prefer the precise level_value from the song list; fall back to parsing
+  // the level string (e.g. "14+" -> 14.9) when the chart isn't found.
+  const constant =
+    constantMap.get(constantKey(score.id, score.type, score.level_index)) ?? parseConstant(level);
   return {
     id: score.id,
     title: score.song_name || `曲目 ${score.id}`,
     difficulty: level,
     constant,
     achievements: score.achievements,
-    grade: score.rate?.toUpperCase() || "—",
+    grade: normalizeGrade(score.rate),
     rating: score.dx_rating ?? 0,
     dxScore: score.dx_score,
     type: score.type as ChartType,
@@ -236,6 +245,47 @@ function parseConstant(level: string): number | null {
   return level.includes("+") ? base + 0.9 : base;
 }
 
+// Lookup key: `${id}|${type}|${level_index}` -> precise chart constant (level_value).
+// Built once from the public song list and reused across profile fetches.
+type ConstantMap = Map<string, number>;
+let constantMapPromise: Promise<ConstantMap> | null = null;
+
+function constantKey(id: number, type: string, levelIndex: number): string {
+  return `${id}|${type}|${levelIndex}`;
+}
+
+// Fetch the full song list (public, no auth) and build a constant lookup map.
+// Cached for the lifetime of the page load; song constants rarely change.
+async function buildConstantMap(): Promise<ConstantMap> {
+  const client = new LxnsApiClient({ baseURL: BASE_URL });
+  const { songs } = (await client.maimai.public.getSongList()) as {
+    songs: Array<{
+      id: number;
+      difficulties: {
+        standard: Array<{ difficulty: number; level_value: number }>;
+        dx: Array<{ difficulty: number; level_value: number }>;
+        utage?: Array<{ difficulty: number; level_value: number }>;
+      };
+    }>;
+  };
+  const map: ConstantMap = new Map();
+  for (const song of songs) {
+    for (const type of ["standard", "dx", "utage"] as const) {
+      const diffs = song.difficulties[type];
+      if (!diffs) continue;
+      for (const diff of diffs) {
+        map.set(constantKey(song.id, type, diff.difficulty), diff.level_value);
+      }
+    }
+  }
+  return map;
+}
+
+function getConstantMap(): Promise<ConstantMap> {
+  if (!constantMapPromise) constantMapPromise = buildConstantMap().catch(() => new Map());
+  return constantMapPromise;
+}
+
 // Map a LXNS rate code (e.g. 'sssp') to a display label ('SSS+') and a color.
 const GRADE_META: Record<string, { label: string; color: string }> = {
   sssp: { label: "SSS+", color: "#fbbf24" },
@@ -244,21 +294,45 @@ const GRADE_META: Record<string, { label: string; color: string }> = {
   ss: { label: "SS", color: "#84cc16" },
   sp: { label: "S+", color: "#22d3ee" },
   s: { label: "S", color: "#38bdf8" },
+  // AAAp/AAAp/AAp/Ap/Bp map to A+/A/B+/B etc. — LXNS returns lowercase codes,
+  // so keep a few lower-grade mappings for completeness even though the
+  // distribution only renders S and above.
+  aaap: { label: "AAA+", color: "#fb7185" },
+  aaa: { label: "AAA", color: "#f87171" },
+  aap: { label: "AA+", color: "#fb923c" },
+  aa: { label: "AA", color: "#f97316" },
+  ap: { label: "A+", color: "#fdba74" },
+  a: { label: "A", color: "#fcd34d" },
+  bp: { label: "B+", color: "#a3e635" },
+  b: { label: "B", color: "#84cc16" },
+  cp: { label: "C+", color: "#22d3ee" },
+  c: { label: "C", color: "#38bdf8" },
+  dp: { label: "D+", color: "#818cf8" },
+  d: { label: "D", color: "#6366f1" },
 };
 
+// Normalize a raw LXNS rate code (any case) to the display label used across the UI.
+function normalizeGrade(rate?: string): string {
+  if (!rate) return "—";
+  return GRADE_META[rate.toLowerCase()]?.label ?? rate.toUpperCase();
+}
+
 // S and above only — anything below is dropped from the distribution.
-const GRADE_ORDER = ["sssp", "sss", "ssp", "ss", "sp", "s"];
+// Keyed by display label so it works whether grade came from a rate code
+// (normalized to label) or from mock data (already a label).
+const GRADE_ORDER = ["SSS+", "SSS", "SS+", "SS", "S+", "S"];
 
 function buildGradeDistribution(scores: PlayerScore[]): GradeBucket[] {
+  const labelToMeta = new Map(Object.entries(GRADE_META).map(([, v]) => [v.label, v]));
   const counts = new Map<string, number>();
   for (const score of scores) {
-    const key = score.grade.toLowerCase();
+    const key = score.grade;
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
-  return GRADE_ORDER.filter((key) => counts.has(key)).map((key) => ({
-    name: GRADE_META[key]?.label ?? key.toUpperCase(),
-    count: counts.get(key) ?? 0,
-    color: GRADE_META[key]?.color ?? "#94a3b8",
+  return GRADE_ORDER.filter((label) => counts.has(label)).map((label) => ({
+    name: label,
+    count: counts.get(label) ?? 0,
+    color: labelToMeta.get(label)?.color ?? "#94a3b8",
   }));
 }
 
@@ -284,13 +358,12 @@ function buildDxStarDistribution(scores: PlayerScore[]): DxStarBucket[] {
   }
   const total = [...counts.values()].reduce((sum, count) => sum + count, 0);
   if (total === 0) return [];
-  return [5, 4, 3, 2, 1, 0]
-    .filter((star) => counts.has(star))
-    .map((star) => ({
-      star,
-      count: counts.get(star) ?? 0,
-      percentage: ((counts.get(star) ?? 0) / total) * 100,
-    }));
+  // Always show all 6 tiers (0-5) even when count is 0, so the chart is stable.
+  return [5, 4, 3, 2, 1, 0].map((star) => ({
+    star,
+    count: counts.get(star) ?? 0,
+    percentage: ((counts.get(star) ?? 0) / total) * 100,
+  }));
 }
 
 function buildLevelPreferences(scores: PlayerScore[]): LevelPreferenceBucket[] {
@@ -323,6 +396,69 @@ function buildLevelPreferences(scores: PlayerScore[]): LevelPreferenceBucket[] {
     .sort((a, b) => b.count - a.count || b.averageAchievements - a.averageAchievements);
 }
 
+// Aggregate overview of the Best 50 entries: averages, extremes, constant range.
+function buildB50Stats(b50: PlayerScore[]): B50Stats {
+  if (b50.length === 0) {
+    return {
+      count: 0,
+      averageAchievements: 0,
+      bestAchievements: 0,
+      maxRating: 0,
+      minRating: 0,
+      minConstant: null,
+      maxConstant: null,
+    };
+  }
+  let sumAchievements = 0;
+  let bestAchievements = 0;
+  let maxRating = 0;
+  let minRating = Infinity;
+  let minConstant = Infinity;
+  let maxConstant = 0;
+  let hasConstant = false;
+  for (const score of b50) {
+    sumAchievements += score.achievements;
+    bestAchievements = Math.max(bestAchievements, score.achievements);
+    maxRating = Math.max(maxRating, score.rating);
+    minRating = Math.min(minRating, score.rating);
+    if (score.constant != null) {
+      hasConstant = true;
+      minConstant = Math.min(minConstant, score.constant);
+      maxConstant = Math.max(maxConstant, score.constant);
+    }
+  }
+  return {
+    count: b50.length,
+    averageAchievements: sumAchievements / b50.length,
+    bestAchievements,
+    maxRating,
+    minRating,
+    minConstant: hasConstant ? minConstant : null,
+    maxConstant: hasConstant ? maxConstant : null,
+  };
+}
+
+// Group B50 entries into chart-constant buckets: 13, 13+, 14, 14+, 15+.
+// A constant like 13.7 falls into "13+", 14.0 into "14", 14.9 into "14+", etc.
+function buildConstantDistribution(b50: PlayerScore[]): ConstantBucket[] {
+  const buckets = new Map<number, { label: string; count: number }>();
+  for (const score of b50) {
+    if (score.constant == null) continue;
+    const c = score.constant;
+    // base is the integer floor; "plus" means fractional part >= 0.7.
+    const base = Math.floor(c);
+    const isPlus = c - base >= 0.7;
+    const bucketValue = isPlus ? base + 0.7 : base;
+    const label = isPlus ? `${base}+` : `${base}`;
+    const entry = buckets.get(bucketValue) ?? { label, count: 0 };
+    entry.count += 1;
+    buckets.set(bucketValue, entry);
+  }
+  return [...buckets.entries()]
+    .map(([value, entry]) => ({ value, label: entry.label, count: entry.count }))
+    .sort((a, b) => a.value - b.value);
+}
+
 function heatmapToWeeks(heatmap: LxnsHeatmap): { total: number; weeks: SyncWeek[] } {
   const today = new Date();
   const start = new Date(today);
@@ -345,21 +481,27 @@ function heatmapToWeeks(heatmap: LxnsHeatmap): { total: number; weeks: SyncWeek[
   return { total, weeks };
 }
 
-function transformLxnsProfile(
+async function transformLxnsProfile(
   player: LxnsPlayer,
   bests: LxnsBests,
   allScoresRaw: LxnsScore[],
   heatmap: LxnsHeatmap | null,
   trend: LxnsTrendPoint[],
-): PlayerProfile {
+): Promise<PlayerProfile> {
+  // Build the chart constant lookup map once (cached), so every score resolves
+  // its precise constant instead of guessing from the "14+" level string.
+  const constantMap = await getConstantMap();
+  const toPlayerScore = (score: LxnsScore) => scoreToPlayerScore(score, constantMap);
   // B50 = best entries (used for featured scores + rating breakdown).
-  const b50 = [...bests.standard, ...bests.dx]
-    .map(scoreToPlayerScore)
-    .sort((a, b) => b.rating - a.rating);
+  const b50 = (await Promise.all([...bests.standard, ...bests.dx].map(toPlayerScore))).sort(
+    (a, b) => b.rating - a.rating,
+  );
   const featured = b50.slice(0, 6);
+  const b50Stats = buildB50Stats(b50);
+  const constantDistribution = buildConstantDistribution(b50);
   // Full score history = every chart the player has recorded. Used for the
   // quality / grade distribution stats so they reflect all play, not just B50.
-  const allScores = allScoresRaw.map(scoreToPlayerScore);
+  const allScores = await Promise.all(allScoresRaw.map(toPlayerScore));
   const gradeDistribution = buildGradeDistribution(allScores);
   const quality = computeQuality(allScores);
   const dxStarDistribution = buildDxStarDistribution(allScores);
@@ -391,6 +533,8 @@ function transformLxnsProfile(
     ratingTrend,
     scores: featured,
     b50Count: b50.length,
+    b50Stats,
+    constantDistribution,
     totalScoreCount: allScores.length,
     quality,
     gradeDistribution,

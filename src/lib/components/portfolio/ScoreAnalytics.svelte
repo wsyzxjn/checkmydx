@@ -66,12 +66,8 @@
 >
   {#if showStars}
     <Card variant="default" padding="md" class="h-full">
-      <div class="mb-4 flex items-center justify-between gap-3">
-        <div>
-          <h4 class="font-semibold text-text-primary">DX 星级占比</h4>
-          <p class="mt-1 text-xs text-text-tertiary">按已记录成绩统计</p>
-        </div>
-        <div class="text-right text-xs text-text-tertiary">{profile.totalScoreCount} 条</div>
+      <div class="mb-4">
+        <h4 class="font-semibold text-text-primary">DX 星级占比</h4>
       </div>
 
       {#if starBuckets.length > 0}
@@ -129,17 +125,13 @@
     <Card variant="default" padding="md" class="h-full">
       <div class="mb-4">
         <h4 class="font-semibold text-text-primary">等级平均完成率排行</h4>
-        <p class="mt-1 text-xs text-text-tertiary">不含宴会谱面，按平均完成率排序</p>
       </div>
 
       {#if levelByAverage.length > 0}
         <div class="space-y-3">
           {#each levelByAverage as bucket (bucket.level)}
             <div class="grid grid-cols-[4.25rem_minmax(0,1fr)_6.5rem] items-center gap-4 text-sm">
-              <div>
-                <div class="font-semibold text-text-primary">{bucket.level}</div>
-                <div class="mt-1 text-xs text-text-tertiary">{bucket.count} 条</div>
-              </div>
+              <div class="font-semibold text-text-primary">{bucket.level}</div>
               <div class="h-2 overflow-hidden rounded-full bg-bg-tertiary">
                 <div
                   class="h-full rounded-full bg-accent-blue"

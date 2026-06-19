@@ -5,6 +5,8 @@
   import ScoreQuality from "$lib/components/portfolio/ScoreQuality.svelte";
   import GradeDistribution from "$lib/components/portfolio/GradeDistribution.svelte";
   import ScoreAnalytics from "$lib/components/portfolio/ScoreAnalytics.svelte";
+  import B50Stats from "$lib/components/portfolio/B50Stats.svelte";
+  import ConstantDistribution from "$lib/components/portfolio/ConstantDistribution.svelte";
   import ScoreCard from "$lib/components/portfolio/ScoreCard.svelte";
   import Card from "$lib/components/ui/Card.svelte";
 
@@ -20,7 +22,7 @@
 <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 {className}">
   <div class="flex flex-col gap-8 lg:flex-row">
     <!-- Sidebar -->
-    <div class="w-full lg:sticky lg:top-24 lg:self-start lg:w-[296px] lg:flex-shrink-0">
+    <div class="w-full lg:sticky lg:top-24 lg:self-start lg:w-74 lg:shrink-0">
       <ProfileSidebar {profile} {views} />
     </div>
 
@@ -46,6 +48,9 @@
       <!-- Rating trend -->
       <RatingTrend {profile} />
 
+      <!-- B50 overview -->
+      <B50Stats {profile} />
+
       <!-- Score quality -->
       <ScoreQuality {profile} />
 
@@ -53,9 +58,12 @@
       <div class="space-y-4">
         <div class="grid gap-4 lg:grid-cols-2">
           <GradeDistribution {profile} />
-          <ScoreAnalytics {profile} mode="stars" />
+          <ConstantDistribution {profile} />
         </div>
-        <ScoreAnalytics {profile} mode="levels" />
+        <div class="grid gap-4 lg:grid-cols-2">
+          <ScoreAnalytics {profile} mode="stars" />
+          <ScoreAnalytics {profile} mode="levels" />
+        </div>
       </div>
 
       <!-- Featured scores -->

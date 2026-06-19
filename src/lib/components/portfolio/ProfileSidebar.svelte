@@ -15,16 +15,16 @@
   const syncDate = $derived(formatSyncDate(profile.identity.lastSync));
 </script>
 
-<aside class="flex flex-col gap-4 items-center lg:items-start text-center lg:text-left {className}">
+<aside class="flex flex-col gap-4 items-center text-center {className}">
   <!-- Avatar -->
   <img
     src={profile.identity.avatarUrl}
     alt={profile.identity.name}
-    width="296"
-    height="296"
+    width="128"
+    height="128"
     fetchpriority="high"
     decoding="async"
-    class="h-74 w-74 rounded-full border-4 border-border-default bg-bg-tertiary object-cover"
+    class="h-32 w-32 rounded-full border-4 border-border-default bg-bg-tertiary object-cover"
   />
 
   <!-- Name & friend code -->
@@ -39,7 +39,7 @@
 
   <!-- Rank badges -->
   {#if course || profile.identity.star != null}
-    <div class="flex flex-wrap justify-center lg:justify-start gap-2">
+    <div class="flex flex-wrap justify-center gap-2">
       {#if course}
         <Badge variant="solid" size="sm" color="#3291FF">{course}</Badge>
       {/if}
@@ -60,16 +60,16 @@
     <div class="mt-1 text-4xl font-bold text-accent-green">
       {profile.identity.rating}
     </div>
-    <div class="mt-2 flex items-center justify-between text-xs text-text-tertiary">
-      <span>B35 {profile.rating.oldB35}</span>
-      <span>B15 {profile.rating.newB15}</span>
+    <div class="mt-2 flex flex-col gap-1 text-center text-xs text-text-primary">
+      <span>B35: {profile.rating.oldB35}</span>
+      <span>B15: {profile.rating.newB15}</span>
     </div>
   </div>
 
   <!-- Meta -->
   <div class="space-y-2 text-sm text-text-secondary">
     {#if syncDate}
-      <div class="flex items-center justify-center lg:justify-start gap-2">
+      <div class="flex items-center justify-center gap-2">
         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             stroke-linecap="round"
@@ -81,7 +81,7 @@
         <span>{syncDate}</span>
       </div>
     {/if}
-    <div class="flex items-center justify-center lg:justify-start gap-2">
+    <div class="flex items-center justify-center gap-2">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="h-4 w-4"

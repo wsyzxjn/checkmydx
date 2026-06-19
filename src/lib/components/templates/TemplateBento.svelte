@@ -6,6 +6,8 @@
   import RatingTrend from "$lib/components/portfolio/RatingTrend.svelte";
   import GradeDistribution from "$lib/components/portfolio/GradeDistribution.svelte";
   import ScoreAnalytics from "$lib/components/portfolio/ScoreAnalytics.svelte";
+  import B50Stats from "$lib/components/portfolio/B50Stats.svelte";
+  import ConstantDistribution from "$lib/components/portfolio/ConstantDistribution.svelte";
   import ScoreCard from "$lib/components/portfolio/ScoreCard.svelte";
 
   interface Props {
@@ -91,6 +93,11 @@
       <RatingTrend {profile} />
     </div>
 
+    <!-- B50 overview (2 cols) -->
+    <div class="md:col-span-2">
+      <B50Stats {profile} />
+    </div>
+
     <!-- Sync count -->
     <Card variant="elevated" padding="lg">
       <div class="flex h-full flex-col items-center justify-center text-center">
@@ -133,9 +140,12 @@
       <div class="space-y-4">
         <div class="grid gap-4 lg:grid-cols-2">
           <GradeDistribution {profile} />
-          <ScoreAnalytics {profile} mode="stars" />
+          <ConstantDistribution {profile} />
         </div>
-        <ScoreAnalytics {profile} mode="levels" />
+        <div class="grid gap-4 lg:grid-cols-2">
+          <ScoreAnalytics {profile} mode="stars" />
+          <ScoreAnalytics {profile} mode="levels" />
+        </div>
       </div>
     </div>
 

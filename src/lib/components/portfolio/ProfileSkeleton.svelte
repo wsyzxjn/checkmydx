@@ -7,7 +7,7 @@
   <div class="flex flex-col gap-8 lg:flex-row">
     <!-- Sidebar skeleton -->
     <aside
-      class="flex w-full flex-col items-center gap-4 text-center lg:w-[296px] lg:flex-shrink-0 lg:items-start lg:text-left"
+      class="flex w-full flex-col items-center gap-4 text-center lg:w-74 lg:shrink-0 lg:items-start lg:text-left"
     >
       <Skeleton variant="circular" width="296px" height="296px" />
       <div class="w-full space-y-2">

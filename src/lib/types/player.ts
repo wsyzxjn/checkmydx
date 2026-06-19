@@ -123,6 +123,34 @@ export interface RatingTrendPoint {
   date: string;
 }
 
+/** Aggregate overview of the player's Best 50 entries. */
+export interface B50Stats {
+  /** Number of B50 entries (<= 50). */
+  count: number;
+  /** Average achievement rate across B50. */
+  averageAchievements: number;
+  /** Highest single-chart achievement rate in B50. */
+  bestAchievements: number;
+  /** Highest single-chart rating contribution in B50. */
+  maxRating: number;
+  /** Lowest single-chart rating contribution in B50. */
+  minRating: number;
+  /** Lowest chart constant in B50, null when constants unavailable. */
+  minConstant: number | null;
+  /** Highest chart constant in B50, null when constants unavailable. */
+  maxConstant: number | null;
+}
+
+/** One bucket in the chart-constant distribution of the B50. */
+export interface ConstantBucket {
+  /** Constant label, e.g. '13', '13+', '14', '14+', '15'. */
+  label: string;
+  /** Numeric lower bound of the bucket (13, 13.7, 14, 14.7, 15). */
+  value: number;
+  /** Number of B50 entries in this bucket. */
+  count: number;
+}
+
 /** Core player identity. */
 export interface PlayerIdentity {
   /** Display name. */
@@ -153,6 +181,10 @@ export interface PlayerProfile {
   scores: PlayerScore[];
   /** B50 entry count (<= 50). */
   b50Count: number;
+  /** Aggregate overview of the Best 50 entries. */
+  b50Stats: B50Stats;
+  /** Chart-constant distribution of the Best 50 entries. */
+  constantDistribution: ConstantBucket[];
   /** Total recorded score count across all charts (used for full-play stats). */
   totalScoreCount: number;
   /** Achievement-quality aggregates (FC/FS/AP counts) over all recorded scores. */

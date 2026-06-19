@@ -11,6 +11,8 @@ import type {
   SyncWeek,
   ChartType,
   RatingTrendPoint,
+  B50Stats,
+  ConstantBucket,
 } from "$lib/types/player";
 import { normalizeUsername } from "$lib/utils/username";
 
@@ -135,18 +137,19 @@ function buildAllScores(seed: number): PlayerScore[] {
   return scores.sort((a, b) => b.rating - a.rating);
 }
 
-const GRADE_ORDER = GRADE_META.map((g) => g.code);
+const GRADE_ORDER = GRADE_META.map((g) => g.label);
 
 function buildGradeDistribution(scores: PlayerScore[]): GradeBucket[] {
+  const codeToMeta = new Map(GRADE_META.map((g) => [g.label, g]));
   const counts = new Map<string, number>();
   for (const score of scores) {
-    const key = score.grade.toLowerCase();
+    const key = score.grade;
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
-  return GRADE_ORDER.filter((key) => counts.has(key)).map((key) => ({
-    name: GRADE_META.find((g) => g.code === key)?.label ?? key.toUpperCase(),
-    count: counts.get(key) ?? 0,
-    color: GRADE_META.find((g) => g.code === key)?.color ?? "#94a3b8",
+  return GRADE_ORDER.filter((label) => counts.has(label)).map((label) => ({
+    name: label,
+    count: counts.get(label) ?? 0,
+    color: codeToMeta.get(label)?.color ?? "#94a3b8",
   }));
 }
 
@@ -172,13 +175,12 @@ function buildDxStarDistribution(scores: PlayerScore[]): DxStarBucket[] {
   }
   const total = [...counts.values()].reduce((sum, count) => sum + count, 0);
   if (total === 0) return [];
-  return [5, 4, 3, 2, 1, 0]
-    .filter((star) => counts.has(star))
-    .map((star) => ({
-      star,
-      count: counts.get(star) ?? 0,
-      percentage: ((counts.get(star) ?? 0) / total) * 100,
-    }));
+  // Always show all 6 tiers (0-5) even when count is 0, so the chart is stable.
+  return [5, 4, 3, 2, 1, 0].map((star) => ({
+    star,
+    count: counts.get(star) ?? 0,
+    percentage: ((counts.get(star) ?? 0) / total) * 100,
+  }));
 }
 
 function buildLevelPreferences(scores: PlayerScore[]): LevelPreferenceBucket[] {
@@ -209,6 +211,67 @@ function buildLevelPreferences(scores: PlayerScore[]): LevelPreferenceBucket[] {
     }))
     .filter((bucket) => bucket.count >= 10)
     .sort((a, b) => b.count - a.count || b.averageAchievements - a.averageAchievements);
+}
+
+// Aggregate overview of the Best 50 entries: averages, extremes, constant range.
+function buildB50Stats(b50: PlayerScore[]): B50Stats {
+  if (b50.length === 0) {
+    return {
+      count: 0,
+      averageAchievements: 0,
+      bestAchievements: 0,
+      maxRating: 0,
+      minRating: 0,
+      minConstant: null,
+      maxConstant: null,
+    };
+  }
+  let sumAchievements = 0;
+  let bestAchievements = 0;
+  let maxRating = 0;
+  let minRating = Infinity;
+  let minConstant = Infinity;
+  let maxConstant = 0;
+  let hasConstant = false;
+  for (const score of b50) {
+    sumAchievements += score.achievements;
+    bestAchievements = Math.max(bestAchievements, score.achievements);
+    maxRating = Math.max(maxRating, score.rating);
+    minRating = Math.min(minRating, score.rating);
+    if (score.constant != null) {
+      hasConstant = true;
+      minConstant = Math.min(minConstant, score.constant);
+      maxConstant = Math.max(maxConstant, score.constant);
+    }
+  }
+  return {
+    count: b50.length,
+    averageAchievements: sumAchievements / b50.length,
+    bestAchievements,
+    maxRating,
+    minRating,
+    minConstant: hasConstant ? minConstant : null,
+    maxConstant: hasConstant ? maxConstant : null,
+  };
+}
+
+// Group B50 entries into chart-constant buckets: 13, 13+, 14, 14+, 15+.
+function buildConstantDistribution(b50: PlayerScore[]): ConstantBucket[] {
+  const buckets = new Map<number, { label: string; count: number }>();
+  for (const score of b50) {
+    if (score.constant == null) continue;
+    const c = score.constant;
+    const base = Math.floor(c);
+    const isPlus = c - base >= 0.7;
+    const bucketValue = isPlus ? base + 0.7 : base;
+    const label = isPlus ? `${base}+` : `${base}`;
+    const entry = buckets.get(bucketValue) ?? { label, count: 0 };
+    entry.count += 1;
+    buckets.set(bucketValue, entry);
+  }
+  return [...buckets.entries()]
+    .map(([value, entry]) => ({ value, label: entry.label, count: entry.count }))
+    .sort((a, b) => a.value - b.value);
 }
 
 function buildHeatmap(seed: number): { total: number; weeks: SyncWeek[] } {
@@ -274,8 +337,11 @@ export async function fetchMaimaiProfile(playerId: string): Promise<PlayerResult
 
   const seed = hashPlayerId(normalized);
   const allScores = buildAllScores(seed);
-  const featured = allScores.slice(0, 6);
   const b50Count = Math.min(50, 35 + (seed % 16));
+  const b50 = allScores.slice(0, b50Count);
+  const featured = b50.slice(0, 6);
+  const b50Stats = buildB50Stats(b50);
+  const constantDistribution = buildConstantDistribution(b50);
   const gradeDistribution = buildGradeDistribution(allScores);
   const quality = computeQuality(allScores);
   const dxStarDistribution = buildDxStarDistribution(allScores);
@@ -302,6 +368,8 @@ export async function fetchMaimaiProfile(playerId: string): Promise<PlayerResult
     ratingTrend,
     scores: featured,
     b50Count,
+    b50Stats,
+    constantDistribution,
     totalScoreCount: allScores.length,
     quality,
     gradeDistribution,

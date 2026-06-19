@@ -11,6 +11,8 @@
   import ScoreQuality from "$lib/components/portfolio/ScoreQuality.svelte";
   import GradeDistribution from "$lib/components/portfolio/GradeDistribution.svelte";
   import ScoreAnalytics from "$lib/components/portfolio/ScoreAnalytics.svelte";
+  import B50Stats from "$lib/components/portfolio/B50Stats.svelte";
+  import ConstantDistribution from "$lib/components/portfolio/ConstantDistribution.svelte";
   import ScoreCard from "$lib/components/portfolio/ScoreCard.svelte";
 
   interface Props {
@@ -82,15 +84,23 @@
     <RatingTrend {profile} />
   </section>
 
+  <!-- B50 overview -->
+  <section class="mb-16">
+    <B50Stats {profile} />
+  </section>
+
   <!-- Score quality + grade distribution -->
   <section class="mb-16 space-y-6">
     <ScoreQuality {profile} />
     <div class="space-y-4">
       <div class="grid gap-4 lg:grid-cols-2">
         <GradeDistribution {profile} />
-        <ScoreAnalytics {profile} mode="stars" />
+        <ConstantDistribution {profile} />
       </div>
-      <ScoreAnalytics {profile} mode="levels" />
+      <div class="grid gap-4 lg:grid-cols-2">
+        <ScoreAnalytics {profile} mode="stars" />
+        <ScoreAnalytics {profile} mode="levels" />
+      </div>
     </div>
   </section>
 

@@ -20,7 +20,7 @@
   class="group flex gap-4 overflow-hidden rounded-md border border-border-default bg-bg-secondary p-4 transition-all hover:border-border-subtle hover:bg-bg-tertiary {className}"
 >
   <!-- Jacket -->
-  <div class="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md bg-bg-tertiary">
+  <div class="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-bg-tertiary">
     {#if imgError}
       <div class="flex h-full w-full items-center justify-center text-text-tertiary">
         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -57,7 +57,7 @@
             : score.difficulty.includes("14")
               ? "#f59e0b"
               : "#22c55e"}
-          class="flex-shrink-0"
+          class="shrink-0"
         >
           {score.difficulty}
         </Badge>
