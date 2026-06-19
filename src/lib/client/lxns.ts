@@ -1,5 +1,5 @@
 import { LxnsOAuthClient, LxnsApiClient } from "lxns-rhythm-api";
-import { env } from "$env/dynamic/public";
+import { PUBLIC_LXNS_OAUTH_CLIENT_ID } from "$env/static/public";
 import { normalizeUsername } from "$lib/utils/username";
 import type {
   PlayerProfile,
@@ -77,7 +77,7 @@ type LxnsTrendPoint = {
 };
 
 export function isLxnsOAuthConfigured() {
-  return Boolean(env.PUBLIC_LXNS_OAUTH_CLIENT_ID);
+  return Boolean(PUBLIC_LXNS_OAUTH_CLIENT_ID);
 }
 
 function getRedirectURI() {
@@ -85,12 +85,12 @@ function getRedirectURI() {
 }
 
 function createOAuthClient() {
-  if (!env.PUBLIC_LXNS_OAUTH_CLIENT_ID) {
+  if (!PUBLIC_LXNS_OAUTH_CLIENT_ID) {
     throw new Error("尚未配置 PUBLIC_LXNS_OAUTH_CLIENT_ID");
   }
 
   return new LxnsOAuthClient({
-    clientId: env.PUBLIC_LXNS_OAUTH_CLIENT_ID,
+    clientId: PUBLIC_LXNS_OAUTH_CLIENT_ID,
     redirectURI: getRedirectURI(),
     baseURL: BASE_URL,
   });
