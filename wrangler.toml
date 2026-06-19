@@ -1,9 +1,0 @@
-name = "checkmygit"
-pages_build_output_dir = ".svelte-kit/cloudflare"
-compatibility_date = "2024-09-23"
-compatibility_flags = ["nodejs_compat"]
-
-[[kv_namespaces]]
-binding = "PROFILE_VIEWS"
-id = "99cb8627be16447aae60dbacc0299dc8"
-preview_id = "99cb8627be16447aae60dbacc0299dc8"

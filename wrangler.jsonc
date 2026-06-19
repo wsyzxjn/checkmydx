@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "checkmydx",
+  "main": ".svelte-kit/cloudflare/_worker.js",
+  "compatibility_date": "2025-05-01",
+  "compatibility_flags": ["nodejs_als"],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".svelte-kit/cloudflare"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "PROFILE_VIEWS",
+      "id": "99cb8627be16447aae60dbacc0299dc8"
+    }
+  ]
+}

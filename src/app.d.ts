@@ -9,11 +9,10 @@ declare global {
     // interface PageState {}
     interface Platform {
       env: {
-        GITHUB_TOKEN?: string;
         PROFILE_VIEWS: KVNamespace;
       };
       context: {
-        waitUntil(promise: Promise<any>): void;
+        waitUntil(promise: Promise<unknown>): void;
       };
       caches: CacheStorage & { default: Cache };
     }
