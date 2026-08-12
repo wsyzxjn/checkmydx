@@ -1,6 +1,11 @@
 <script lang="ts">
   import type { PlayerProfile } from "$lib/types/player";
-  import { formatNumber, formatSyncDate, courseRankLabel } from "$lib/utils/player-transform";
+  import {
+    courseRankLabel,
+    formatNumber,
+    formatSyncDate,
+    ratingTier,
+  } from "$lib/utils/player-transform";
   import Badge from "$lib/components/ui/Badge.svelte";
 
   interface Props {
@@ -13,6 +18,10 @@
 
   const course = $derived(courseRankLabel(profile.identity.courseRank));
   const syncDate = $derived(formatSyncDate(profile.identity.lastSync));
+  const tier = $derived(ratingTier(profile.identity.rating));
+  const ratingTotal = $derived(Math.max(1, profile.rating.oldB35 + profile.rating.newB15));
+  const b35Pct = $derived((profile.rating.oldB35 / ratingTotal) * 100);
+  const b15Pct = $derived((profile.rating.newB15 / ratingTotal) * 100);
 </script>
 
 <aside class="flex flex-col gap-4 items-center text-center {className}">
@@ -38,16 +47,15 @@
   </div>
 
   <!-- Rank badges -->
-  {#if course || profile.identity.star != null}
-    <div class="flex flex-wrap justify-center gap-2">
-      {#if course}
-        <Badge variant="solid" size="sm" color="#3291FF">{course}</Badge>
-      {/if}
-      {#if profile.identity.star != null}
-        <Badge variant="default" size="sm">★ {formatNumber(profile.identity.star)}</Badge>
-      {/if}
-    </div>
-  {/if}
+  <div class="flex flex-wrap justify-center gap-2">
+    {#if course}
+      <Badge variant="solid" size="sm" color="#3291FF">{course}</Badge>
+    {/if}
+    {#if profile.identity.star != null}
+      <Badge variant="default" size="sm">★ {formatNumber(profile.identity.star)}</Badge>
+    {/if}
+    <Badge variant="outline" size="sm" color={tier.color}>{tier.label}</Badge>
+  </div>
 
   <!-- Trophy -->
   {#if profile.identity.trophy}
@@ -56,13 +64,27 @@
 
   <!-- Headline rating -->
   <div class="w-full rounded-md border border-border-default bg-bg-secondary p-4">
-    <div class="text-xs uppercase tracking-wider text-text-tertiary">DX Rating</div>
-    <div class="mt-1 text-4xl font-bold text-accent-green">
+    <div
+      class="flex items-center justify-between text-xs uppercase tracking-wider text-text-tertiary"
+    >
+      <span>DX Rating</span>
+      <span class="normal-case tracking-normal" style="color: {tier.color}">{tier.label}</span>
+    </div>
+    <div
+      class="mt-1 text-4xl font-bold {tier.rainbow ? 'rating-rainbow' : ''}"
+      style={tier.rainbow ? undefined : `color: ${tier.color}`}
+    >
       {profile.identity.rating}
     </div>
-    <div class="mt-2 flex flex-col gap-1 text-center text-xs text-text-primary">
-      <span>B35: {profile.rating.oldB35}</span>
-      <span>B15: {profile.rating.newB15}</span>
+    <div class="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-bg-tertiary">
+      <div class="flex h-full w-full">
+        <div class="h-full bg-sky-400" style="width: {b35Pct}%"></div>
+        <div class="h-full bg-violet-400" style="width: {b15Pct}%"></div>
+      </div>
+    </div>
+    <div class="mt-2 flex justify-between text-xs text-text-primary">
+      <span>B35 {formatNumber(profile.rating.oldB35)}</span>
+      <span>B15 {formatNumber(profile.rating.newB15)}</span>
     </div>
   </div>
 

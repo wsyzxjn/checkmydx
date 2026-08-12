@@ -337,8 +337,10 @@ export async function fetchMaimaiProfile(playerId: string): Promise<PlayerResult
 
   const seed = hashPlayerId(normalized);
   const allScores = buildAllScores(seed);
-  const b50Count = Math.min(50, 35 + (seed % 16));
-  const b50 = allScores.slice(0, b50Count);
+  const b35 = allScores.filter((score) => score.type !== "dx").slice(0, 35);
+  const b15 = allScores.filter((score) => score.type === "dx").slice(0, 15);
+  const b50 = [...b35, ...b15].sort((a, b) => b.rating - a.rating);
+  const b50Count = b50.length;
   const featured = b50.slice(0, 6);
   const b50Stats = buildB50Stats(b50);
   const constantDistribution = buildConstantDistribution(b50);
@@ -367,6 +369,8 @@ export async function fetchMaimaiProfile(playerId: string): Promise<PlayerResult
     rating: { total: rating, oldB35, newB15 },
     ratingTrend,
     scores: featured,
+    b35,
+    b15,
     b50Count,
     b50Stats,
     constantDistribution,

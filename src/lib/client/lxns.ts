@@ -492,10 +492,12 @@ async function transformLxnsProfile(
   // its precise constant instead of guessing from the "14+" level string.
   const constantMap = await getConstantMap();
   const toPlayerScore = (score: LxnsScore) => scoreToPlayerScore(score, constantMap);
-  // B50 = best entries (used for featured scores + rating breakdown).
-  const b50 = (await Promise.all([...bests.standard, ...bests.dx].map(toPlayerScore))).sort(
+  // B35 = older-version bests, B15 = current-version bests (落雪 naming: standard/dx).
+  const b35 = (await Promise.all(bests.standard.map(toPlayerScore))).sort(
     (a, b) => b.rating - a.rating,
   );
+  const b15 = (await Promise.all(bests.dx.map(toPlayerScore))).sort((a, b) => b.rating - a.rating);
+  const b50 = [...b35, ...b15].sort((a, b) => b.rating - a.rating);
   const featured = b50.slice(0, 6);
   const b50Stats = buildB50Stats(b50);
   const constantDistribution = buildConstantDistribution(b50);
@@ -532,6 +534,8 @@ async function transformLxnsProfile(
     rating: { total: player.rating, oldB35, newB15 },
     ratingTrend,
     scores: featured,
+    b35,
+    b15,
     b50Count: b50.length,
     b50Stats,
     constantDistribution,

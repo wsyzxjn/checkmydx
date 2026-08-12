@@ -1,17 +1,22 @@
 <script lang="ts">
   import type { PlayerProfile } from "$lib/types/player";
   import {
+    courseRankLabel,
     formatNumber,
     formatSyncDate,
-    courseRankLabel,
+    highlightScores,
+    ratingTier,
+    scoreKey,
     totalSyncs,
   } from "$lib/utils/player-transform";
   import Badge from "$lib/components/ui/Badge.svelte";
   import RatingTrend from "$lib/components/portfolio/RatingTrend.svelte";
+  import SyncHeatmap from "$lib/components/portfolio/SyncHeatmap.svelte";
   import ScoreQuality from "$lib/components/portfolio/ScoreQuality.svelte";
   import GradeDistribution from "$lib/components/portfolio/GradeDistribution.svelte";
   import ScoreAnalytics from "$lib/components/portfolio/ScoreAnalytics.svelte";
   import B50Stats from "$lib/components/portfolio/B50Stats.svelte";
+  import B50Grid from "$lib/components/portfolio/B50Grid.svelte";
   import ConstantDistribution from "$lib/components/portfolio/ConstantDistribution.svelte";
   import ScoreCard from "$lib/components/portfolio/ScoreCard.svelte";
 
@@ -26,6 +31,8 @@
   const course = $derived(courseRankLabel(profile.identity.courseRank));
   const syncs = $derived(totalSyncs(profile));
   const syncDate = $derived(formatSyncDate(profile.identity.lastSync));
+  const tier = $derived(ratingTier(profile.identity.rating));
+  const highlights = $derived(highlightScores(profile, 4));
 </script>
 
 <div class="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8 {className}">
@@ -43,16 +50,15 @@
     <h1 class="text-4xl font-bold text-text-primary">{profile.identity.name}</h1>
     <p class="mt-2 text-xl text-text-secondary">{profile.identity.friendCode}</p>
 
-    {#if course || profile.identity.star != null}
-      <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
-        {#if course}
-          <Badge variant="solid" size="md" color="#3291FF">{course}</Badge>
-        {/if}
-        {#if profile.identity.star != null}
-          <Badge variant="default" size="md">★ {formatNumber(profile.identity.star)}</Badge>
-        {/if}
-      </div>
-    {/if}
+    <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
+      {#if course}
+        <Badge variant="solid" size="md" color="#3291FF">{course}</Badge>
+      {/if}
+      {#if profile.identity.star != null}
+        <Badge variant="default" size="md">★ {formatNumber(profile.identity.star)}</Badge>
+      {/if}
+      <Badge variant="outline" size="md" color={tier.color}>{tier.label}</Badge>
+    </div>
 
     {#if profile.identity.trophy}
       <p class="mt-4 text-text-secondary">{profile.identity.trophy}</p>
@@ -63,8 +69,13 @@
   <section class="mb-12">
     <div class="flex flex-wrap items-center justify-center gap-8 text-center">
       <div>
-        <div class="text-3xl font-bold text-accent-green">{profile.identity.rating}</div>
-        <div class="text-sm text-text-secondary">DX Rating</div>
+        <div
+          class="text-3xl font-bold {tier.rainbow ? 'rating-rainbow' : ''}"
+          style={tier.rainbow ? undefined : `color: ${tier.color}`}
+        >
+          {profile.identity.rating}
+        </div>
+        <div class="text-sm text-text-secondary">DX Rating · {tier.label}</div>
       </div>
       <div class="h-12 w-px bg-border-default"></div>
       <div>
@@ -84,9 +95,19 @@
     <RatingTrend {profile} />
   </section>
 
+  <!-- Sync heatmap -->
+  <section class="mb-16">
+    <SyncHeatmap {profile} />
+  </section>
+
   <!-- B50 overview -->
   <section class="mb-16">
     <B50Stats {profile} />
+  </section>
+
+  <!-- Full B50 jackets -->
+  <section class="mb-16">
+    <B50Grid {profile} />
   </section>
 
   <!-- Score quality + grade distribution -->
@@ -104,17 +125,17 @@
     </div>
   </section>
 
-  <!-- Featured scores -->
-  {#if profile.scores.length > 0}
+  <!-- Highlight scores -->
+  {#if highlights.length > 0}
     <section class="mb-16">
       <h2
         class="mb-8 text-center text-xs font-semibold uppercase tracking-widest text-text-tertiary"
       >
-        代表成绩
+        高光成绩
       </h2>
       <div class="space-y-3">
-        {#each profile.scores.slice(0, 4) as score (score.id)}
-          <ScoreCard {score} />
+        {#each highlights as item (scoreKey(item.score))}
+          <ScoreCard score={item.score} highlight={item.label} />
         {/each}
       </div>
     </section>

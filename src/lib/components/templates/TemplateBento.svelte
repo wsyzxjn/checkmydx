@@ -1,12 +1,21 @@
 <script lang="ts">
   import type { PlayerProfile } from "$lib/types/player";
-  import { formatNumber, courseRankLabel, totalSyncs } from "$lib/utils/player-transform";
+  import {
+    courseRankLabel,
+    formatNumber,
+    highlightScores,
+    ratingTier,
+    scoreKey,
+    totalSyncs,
+  } from "$lib/utils/player-transform";
   import Card from "$lib/components/ui/Card.svelte";
   import Badge from "$lib/components/ui/Badge.svelte";
   import RatingTrend from "$lib/components/portfolio/RatingTrend.svelte";
+  import SyncHeatmap from "$lib/components/portfolio/SyncHeatmap.svelte";
   import GradeDistribution from "$lib/components/portfolio/GradeDistribution.svelte";
   import ScoreAnalytics from "$lib/components/portfolio/ScoreAnalytics.svelte";
   import B50Stats from "$lib/components/portfolio/B50Stats.svelte";
+  import B50Grid from "$lib/components/portfolio/B50Grid.svelte";
   import ConstantDistribution from "$lib/components/portfolio/ConstantDistribution.svelte";
   import ScoreCard from "$lib/components/portfolio/ScoreCard.svelte";
 
@@ -21,6 +30,8 @@
   const course = $derived(courseRankLabel(profile.identity.courseRank));
   const syncs = $derived(totalSyncs(profile));
   const q = $derived(profile.quality);
+  const tier = $derived(ratingTier(profile.identity.rating));
+  const highlights = $derived(highlightScores(profile, 6));
 </script>
 
 <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 {className}">
@@ -48,7 +59,21 @@
               {#if profile.identity.star != null}
                 <Badge variant="default" size="sm">★ {formatNumber(profile.identity.star)}</Badge>
               {/if}
+              <Badge variant="outline" size="sm" color={tier.color}>{tier.label}</Badge>
             </div>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <div class="text-xs uppercase tracking-wider text-text-tertiary">DX Rating</div>
+          <div
+            class="mt-1 text-4xl font-bold {tier.rainbow ? 'rating-rainbow' : ''}"
+            style={tier.rainbow ? undefined : `color: ${tier.color}`}
+          >
+            {profile.identity.rating}
+          </div>
+          <div class="mt-1 text-xs text-text-secondary">
+            B35 {formatNumber(profile.rating.oldB35)} · B15 {formatNumber(profile.rating.newB15)}
           </div>
         </div>
 
@@ -135,6 +160,16 @@
       </div>
     </Card>
 
+    <!-- Heatmap (full width) -->
+    <div class="md:col-span-2 lg:col-span-4">
+      <SyncHeatmap {profile} />
+    </div>
+
+    <!-- B50 jackets (full width) -->
+    <div class="md:col-span-2 lg:col-span-4">
+      <B50Grid {profile} />
+    </div>
+
     <!-- Distribution charts (full width) -->
     <div class="md:col-span-2 lg:col-span-4">
       <div class="space-y-4">
@@ -149,8 +184,8 @@
       </div>
     </div>
 
-    <!-- Scores (full width) -->
-    {#if profile.scores.length > 0}
+    <!-- Highlights (full width) -->
+    {#if highlights.length > 0}
       <div class="md:col-span-2 lg:col-span-4">
         <div class="mb-4 flex items-center gap-2">
           <svg
@@ -166,11 +201,11 @@
               d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
             />
           </svg>
-          <h3 class="text-lg font-semibold text-text-primary">代表成绩</h3>
+          <h3 class="text-lg font-semibold text-text-primary">高光成绩</h3>
         </div>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {#each profile.scores.slice(0, 6) as score (score.id)}
-            <ScoreCard {score} />
+          {#each highlights as item (scoreKey(item.score))}
+            <ScoreCard score={item.score} highlight={item.label} />
           {/each}
         </div>
       </div>
