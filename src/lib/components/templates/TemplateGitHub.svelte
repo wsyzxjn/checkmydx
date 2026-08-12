@@ -1,11 +1,14 @@
 <script lang="ts">
   import type { PlayerProfile } from "$lib/types/player";
+  import { highlightScores, scoreKey } from "$lib/utils/player-transform";
   import ProfileSidebar from "$lib/components/portfolio/ProfileSidebar.svelte";
   import RatingTrend from "$lib/components/portfolio/RatingTrend.svelte";
+  import SyncHeatmap from "$lib/components/portfolio/SyncHeatmap.svelte";
   import ScoreQuality from "$lib/components/portfolio/ScoreQuality.svelte";
   import GradeDistribution from "$lib/components/portfolio/GradeDistribution.svelte";
   import ScoreAnalytics from "$lib/components/portfolio/ScoreAnalytics.svelte";
   import B50Stats from "$lib/components/portfolio/B50Stats.svelte";
+  import B50Grid from "$lib/components/portfolio/B50Grid.svelte";
   import ConstantDistribution from "$lib/components/portfolio/ConstantDistribution.svelte";
   import ScoreCard from "$lib/components/portfolio/ScoreCard.svelte";
   import Card from "$lib/components/ui/Card.svelte";
@@ -17,6 +20,8 @@
   }
 
   let { profile, class: className = "", views = 0 }: Props = $props();
+
+  const highlights = $derived(highlightScores(profile, 6));
 </script>
 
 <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 {className}">
@@ -36,7 +41,7 @@
               {profile.identity.name} 的 DX 主页
             </h2>
             <p class="mt-1 text-sm text-text-secondary">
-              Rating 趋势、成绩质量、评级分布、同步记录与代表成绩
+              Rating 色段、B50 谱面、同步热力图、成绩质量与高光成绩
             </p>
           </div>
           <div class="text-right text-xs text-text-tertiary">
@@ -48,8 +53,14 @@
       <!-- Rating trend -->
       <RatingTrend {profile} />
 
+      <!-- Sync heatmap -->
+      <SyncHeatmap {profile} />
+
       <!-- B50 overview -->
       <B50Stats {profile} />
+
+      <!-- Full B50 jackets -->
+      <B50Grid {profile} />
 
       <!-- Score quality -->
       <ScoreQuality {profile} />
@@ -66,8 +77,8 @@
         </div>
       </div>
 
-      <!-- Featured scores -->
-      {#if profile.scores.length > 0}
+      <!-- Highlight scores -->
+      {#if highlights.length > 0}
         <div>
           <div class="mb-4 flex items-center gap-2">
             <svg
@@ -83,11 +94,11 @@
                 d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
               />
             </svg>
-            <h3 class="text-lg font-semibold text-text-primary">代表成绩</h3>
+            <h3 class="text-lg font-semibold text-text-primary">高光成绩</h3>
           </div>
           <div class="grid gap-4 sm:grid-cols-2">
-            {#each profile.scores as score (score.id)}
-              <ScoreCard {score} />
+            {#each highlights as item (scoreKey(item.score))}
+              <ScoreCard score={item.score} highlight={item.label} />
             {/each}
           </div>
         </div>

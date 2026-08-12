@@ -177,8 +177,12 @@ export interface PlayerProfile {
   rating: RatingBreakdown;
   /** Rating-over-time trend derived from synced score history. May be empty. */
   ratingTrend: RatingTrendPoint[];
-  /** Featured (top) scores, already sorted desc by rating. */
+  /** Featured highlight scores (highest rating / AP / etc.). */
   scores: PlayerScore[];
+  /** Best 35 from older-version charts, sorted desc by rating. */
+  b35: PlayerScore[];
+  /** Best 15 from current-version charts, sorted desc by rating. */
+  b15: PlayerScore[];
   /** B50 entry count (<= 50). */
   b50Count: number;
   /** Aggregate overview of the Best 50 entries. */

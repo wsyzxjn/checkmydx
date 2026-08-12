@@ -1,26 +1,38 @@
 <script lang="ts">
   import type { PlayerScore } from "$lib/types/player";
-  import { formatNumber, formatAchievements } from "$lib/utils/player-transform";
+  import {
+    chartTypeLabel,
+    formatAchievements,
+    formatNumber,
+    jacketUrl,
+    levelColor,
+  } from "$lib/utils/player-transform";
   import Badge from "$lib/components/ui/Badge.svelte";
+  import ScoreMarks from "$lib/components/portfolio/ScoreMarks.svelte";
 
   interface Props {
     score: PlayerScore;
+    highlight?: string;
     class?: string;
   }
 
-  let { score, class: className = "" }: Props = $props();
+  let { score, highlight, class: className = "" }: Props = $props();
 
-  const typeLabel = $derived(score.type === "dx" ? "DX" : score.type === "utage" ? "宴" : "STD");
-  // maimai jacket assets are keyed by songId % 10000 (version prefix stripped).
-  const jacketUrl = $derived(`https://assets2.lxns.net/maimai/jacket/${score.id % 10000}.png`);
+  const typeLabel = $derived(chartTypeLabel(score.type));
+  const cover = $derived(jacketUrl(score.id));
+  const accent = $derived(levelColor(score.difficulty, score.type));
   let imgError = $state(false);
 </script>
 
 <div
   class="group flex gap-4 overflow-hidden rounded-md border border-border-default bg-bg-secondary p-4 transition-all hover:border-border-subtle hover:bg-bg-tertiary {className}"
+  style="border-left: 3px solid {accent}"
 >
   <!-- Jacket -->
-  <div class="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-bg-tertiary">
+  <div
+    class="relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-bg-tertiary"
+    style="box-shadow: inset 0 0 0 2px {accent}"
+  >
     {#if imgError}
       <div class="flex h-full w-full items-center justify-center text-text-tertiary">
         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -34,7 +46,7 @@
       </div>
     {:else}
       <img
-        src={jacketUrl}
+        src={cover}
         alt={score.title}
         loading="lazy"
         decoding="async"
@@ -47,18 +59,16 @@
   <!-- Body -->
   <div class="flex min-w-0 flex-1 flex-col">
     <div class="flex items-start justify-between gap-2">
-      <h3 class="truncate font-semibold text-text-primary">{score.title}</h3>
+      <div class="min-w-0">
+        {#if highlight}
+          <div class="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-text-tertiary">
+            {highlight}
+          </div>
+        {/if}
+        <h3 class="truncate font-semibold text-text-primary">{score.title}</h3>
+      </div>
       {#if score.difficulty}
-        <Badge
-          variant="outline"
-          size="sm"
-          color={score.difficulty.includes("14+")
-            ? "#ef4444"
-            : score.difficulty.includes("14")
-              ? "#f59e0b"
-              : "#22c55e"}
-          class="shrink-0"
-        >
+        <Badge variant="outline" size="sm" color={accent} class="shrink-0">
           {score.difficulty}
         </Badge>
       {/if}
@@ -70,16 +80,27 @@
       <span class="text-sm text-text-secondary">{formatAchievements(score.achievements)}</span>
     </div>
 
+    {#if score.fc || score.fs || (score.dxStar ?? 0) > 0}
+      <ScoreMarks {score} class="mt-1" />
+    {/if}
+
     <!-- Footer stats -->
-    <div class="mt-auto flex items-center gap-4 pt-2 text-xs text-text-tertiary">
+    <div
+      class="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 pt-2 text-xs text-text-tertiary"
+    >
       {#if score.constant != null}
-        <span class="flex items-center gap-1">
+        <span>
           定数 <span class="font-semibold text-text-secondary">{score.constant.toFixed(1)}</span>
         </span>
       {/if}
-      <span class="flex items-center gap-1">
+      <span>
         Rating <span class="font-semibold text-accent-green">{formatNumber(score.rating)}</span>
       </span>
+      {#if score.dxScore != null}
+        <span>
+          DX 分 <span class="font-semibold text-text-secondary">{formatNumber(score.dxScore)}</span>
+        </span>
+      {/if}
       <span class="ml-auto rounded bg-bg-tertiary px-1.5 py-0.5 text-[10px] text-text-secondary"
         >{typeLabel}</span
       >
