@@ -337,8 +337,18 @@ export async function fetchMaimaiProfile(playerId: string): Promise<PlayerResult
 
   const seed = hashPlayerId(normalized);
   const allScores = buildAllScores(seed);
-  const b35 = allScores.filter((score) => score.type !== "dx").slice(0, 35);
-  const b15 = allScores.filter((score) => score.type === "dx").slice(0, 15);
+  // B50 is unique charts. Repeat plays of the same song/type are dropped so
+  // the jacket grid doesn't show duplicate covers.
+  const uniqueBest: PlayerScore[] = [];
+  const seenCharts = new Set<string>();
+  for (const score of allScores) {
+    const key = `${score.id}-${score.type}`;
+    if (seenCharts.has(key)) continue;
+    seenCharts.add(key);
+    uniqueBest.push(score);
+  }
+  const b35 = uniqueBest.filter((score) => score.type !== "dx").slice(0, 35);
+  const b15 = uniqueBest.filter((score) => score.type === "dx").slice(0, 15);
   const b50 = [...b35, ...b15].sort((a, b) => b.rating - a.rating);
   const b50Count = b50.length;
   const featured = b50.slice(0, 6);

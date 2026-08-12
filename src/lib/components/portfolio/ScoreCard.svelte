@@ -80,7 +80,9 @@
       <span class="text-sm text-text-secondary">{formatAchievements(score.achievements)}</span>
     </div>
 
-    <ScoreMarks {score} class="mt-1" />
+    {#if score.fc || score.fs || (score.dxStar ?? 0) > 0}
+      <ScoreMarks {score} class="mt-1" />
+    {/if}
 
     <!-- Footer stats -->
     <div
